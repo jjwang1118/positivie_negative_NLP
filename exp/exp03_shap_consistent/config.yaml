@@ -1,0 +1,30 @@
+experiment:
+  name: exp03
+  description: "SHAP-Consistent Inference — warm-start Phase 3 + SHAP-filter test texts at predict time"
+
+model:
+  name: sbert-minilm  # key into MODEL_REGISTRY in src/config.py
+  hidden_dim: 384     # SBERT all-MiniLM-L6-v2 output dimension
+  mlp_hidden: 64
+  dropout: 0.1
+  num_labels: 2       # 0=negative, 1=positive
+
+phase1:                       # initial training to produce SHAP-ready checkpoints
+  learning_rate: 2.0e-4
+  batch_size: 32
+  epochs: 30
+  max_length: 128
+  seed: 42
+  n_folds: 5
+
+extraction:
+  shap_max_evals: 500         # max model calls per sample (higher = more accurate, slower)
+  shap_label_idx: null        # null = use predicted class; 0 or 1 to fix a specific class
+
+phase2:                       # retrain on SHAP-filtered texts (Phase 3 in the pipeline)
+  learning_rate: 2.0e-4
+  batch_size: 32
+  epochs: 30
+  max_length: 128              # key strings are shorter than full sentences
+  seed: 42
+  n_folds: 5

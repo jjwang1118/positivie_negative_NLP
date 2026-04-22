@@ -13,6 +13,9 @@ venv/
 *.bin
 *.safetensors
 
+# Experiment run outputs
+results/exp*/
+
 # Jupyter
 .ipynb_checkpoints/
 

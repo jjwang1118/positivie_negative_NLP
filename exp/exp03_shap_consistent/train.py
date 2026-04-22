@@ -1,31 +1,33 @@
 """
-exp/exp02_shap_retrain/train.py
-================================
-Standalone two-phase pipeline — no dependency on exp01.
+exp/exp03_shap_consistent/train.py
+====================================
+Improvement over exp02: warm-start Phase 3 from Phase 1 checkpoint +
+CosineAnnealingLR for smoother convergence.
 
 Phase 1 – Initial Training:
-  Train AttentionPoolingClassifier on original texts using stratified 3-fold CV.
+  Train AttentionPoolingClassifier on original texts using stratified 5-fold CV.
   Checkpoints saved to run_dir/phase1/fold{k}/best.pt.
 
 Phase 2 – SHAP Extraction:
   For each fold's val set, load the Phase-1 checkpoint and run
   shap.PartitionExplainer to compute per-word Shapley values.
   Key string = words with positive SHAP value for the predicted class,
-  in original sentence order.  Aggregated to run_dir/key_strings.json
-  (covers every training sample via cross-validation).
+  in original sentence order.  Aggregated to run_dir/key_strings.json.
 
-Phase 3 – Retrain on Filtered Texts:
-  Replace each sample's text with its SHAP key string (fall back to
-  original text when the key string is empty).  Run the same 3-fold CV
-  and save final checkpoints to run_dir/fold{k}/.
+Phase 3 – Retrain on Filtered Texts (improved):
+  - Warm-start: load Phase 1 best.pt of the same fold so attention/MLP
+    weights are already primed instead of random-initialised.
+  - CosineAnnealingLR: decays LR from initial value to 1% over all epochs,
+    avoiding late-epoch oscillation.
+  Checkpoints saved to run_dir/fold{k}/.
 
 Parameters are loaded from config.yaml in the same directory.
 Each execution creates a new numbered run directory:
-  results/exp02/01/  results/exp02/02/  ...
+  results/exp03/01/  results/exp03/02/  ...
 
 Usage
 -----
-    python exp/exp02_shap_retrain/train.py
+    python exp/exp03_shap_consistent/train.py
 """
 
 import csv
@@ -118,9 +120,10 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
     ext  = cfg.get("extraction", {})
 
     fold_data = {r["fold"]: r for r in entry["fold_results"]}
-    exp_val = entry.get("experiment", "")
+    exp_name  = entry.get("experiment", "")
+    exp_short = exp_name.replace("exp", "") if exp_name.startswith("exp") else exp_name
     row = {
-        "exp":           exp_val.replace("exp", "") if exp_val.startswith("exp") else exp_val,
+        "exp":           exp_short,
         "run_id":        entry["run_id"],
         "timestamp":     entry["timestamp"],
         "mean_val_acc":  entry["mean_val_acc"],
@@ -290,7 +293,6 @@ def extract_shap_key_strings(
         text  = all_texts[global_idx]
         label = all_labels[global_idx]
 
-        # Skip texts with < 2 tokens after masking — SHAP clustering requires ≥ 2 words
         stripped_words = [w for w in re.split(r"\W+", text) if w]
         if len(stripped_words) < 2:
             records.append({"fold": fold, "index": global_idx, "label": label, "key_string": " ".join(stripped_words)})
@@ -342,7 +344,6 @@ def main() -> None:
     print(f"Device     : {device}")
 
     shutil.copy(EXP_DIR / "config.yaml", run_dir / "config.yaml")
-
 
     # --- Load data ---
     if not TRAIN_FILE.exists():
@@ -458,10 +459,10 @@ def main() -> None:
     ks_map = {r["index"]: r["key_string"].strip() for r in all_ks_records}
 
     # -----------------------------------------------------------------------
-    # PHASE 3 — Retrain on SHAP-filtered texts
+    # PHASE 3 — Retrain on SHAP-filtered texts (warm-start + CosineAnnealingLR)
     # -----------------------------------------------------------------------
     print(f"\n{'='*60}")
-    print("PHASE 3 — Retrain on SHAP-filtered texts")
+    print("PHASE 3 — Retrain on SHAP-filtered texts (warm-start + CosineAnnealingLR)")
     print(f"{'='*60}")
 
     hp2 = merge(cfg, "model", "phase2")
@@ -501,9 +502,20 @@ def main() -> None:
             freeze_encoder=True,
         ).to(device)
 
+        # Warm-start: load Phase 1 checkpoint so attention/MLP start from a
+        # converged state rather than random initialisation.
+        phase1_ckpt = phase1_dir / f"fold{fold}" / "best.pt"
+        if phase1_ckpt.exists():
+            model.load_state_dict(torch.load(phase1_ckpt, map_location=device, weights_only=True))
+            print(f"  Warm-start from Phase 1 fold {fold} checkpoint")
+
         optimizer = AdamW(
             filter(lambda p: p.requires_grad, model.parameters()),
             lr=hp2["learning_rate"],
+        )
+        # CosineAnnealingLR decays LR smoothly from lr → lr*0.01 over all epochs.
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=hp2["epochs"], eta_min=hp2["learning_rate"] * 0.01
         )
         criterion = nn.CrossEntropyLoss()
 
@@ -514,6 +526,7 @@ def main() -> None:
         for epoch in range(1, hp2["epochs"] + 1):
             train_loss        = train_epoch(model, train_loader, optimizer, criterion, device)
             val_loss, val_acc = evaluate(model, val_loader, criterion, device)
+            scheduler.step()
 
             log_rows.append({
                 "epoch":      epoch,
