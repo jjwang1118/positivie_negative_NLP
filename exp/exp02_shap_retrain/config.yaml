@@ -10,7 +10,7 @@ model:
   num_labels: 2       # 0=negative, 1=positive
 
 phase1:                       # initial training to produce SHAP-ready checkpoints
-  learning_rate: 1e-4
+  learning_rate: 2.0e-4
   batch_size: 32
   epochs: 30
   max_length: 128
@@ -22,7 +22,7 @@ extraction:
   shap_label_idx: null        # null = use predicted class; 0 or 1 to fix a specific class
 
 phase2:                       # retrain on SHAP-filtered texts
-  learning_rate: 1e-4
+  learning_rate: 2.0e-4
   batch_size: 32
   epochs: 30
   max_length: 64              # key strings are shorter than full sentences

@@ -89,39 +89,48 @@ def append_experiment_log(log_path: Path, entry: dict) -> None:
         json.dump(log, f, ensure_ascii=False, indent=2)
 
 
+FIELDNAMES = [
+    "exp", "run_id", "timestamp", "mean_val_acc", "std_val_acc",
+    "fold0_acc", "fold0_loss", "fold1_acc", "fold1_loss", "fold2_acc", "fold2_loss",
+    "learning_rate", "batch_size", "epochs", "max_length", "seed", "n_folds",
+    "model_name", "hidden_dim", "mlp_hidden", "dropout", "shap_max_evals",
+]
+
+
 def append_experiment_csv(csv_path: Path, entry: dict) -> None:
     cfg = entry["config"]
     tr  = cfg.get("training", {})
     mo  = cfg.get("model", {})
 
+    fold_data = {r["fold"]: r for r in entry["fold_results"]}
     row = {
-        "experiment":    entry.get("experiment"),
+        "exp":           entry.get("experiment"),
         "run_id":        entry["run_id"],
         "timestamp":     entry["timestamp"],
         "mean_val_acc":  entry["mean_val_acc"],
         "std_val_acc":   entry["std_val_acc"],
-    }
-    for fold_res in entry["fold_results"]:
-        k = fold_res["fold"]
-        row[f"fold{k}_acc"]  = fold_res["best_val_acc"]
-        row[f"fold{k}_loss"] = fold_res["best_val_loss"]
-
-    row.update({
+        "fold0_acc":     fold_data.get(0, {}).get("best_val_acc"),
+        "fold0_loss":    fold_data.get(0, {}).get("best_val_loss"),
+        "fold1_acc":     fold_data.get(1, {}).get("best_val_acc"),
+        "fold1_loss":    fold_data.get(1, {}).get("best_val_loss"),
+        "fold2_acc":     fold_data.get(2, {}).get("best_val_acc"),
+        "fold2_loss":    fold_data.get(2, {}).get("best_val_loss"),
         "learning_rate": tr.get("learning_rate"),
         "batch_size":    tr.get("batch_size"),
         "epochs":        tr.get("epochs"),
         "max_length":    tr.get("max_length"),
         "seed":          tr.get("seed"),
         "n_folds":       tr.get("n_folds"),
-        "warmup_ratio":  tr.get("warmup_ratio"),
         "model_name":    mo.get("name"),
         "hidden_dim":    mo.get("hidden_dim"),
+        "mlp_hidden":    None,
         "dropout":       mo.get("dropout"),
-    })
+        "shap_max_evals": None,
+    }
 
     write_header = not csv_path.exists()
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         if write_header:
             writer.writeheader()
         writer.writerow(row)

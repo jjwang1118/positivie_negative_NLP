@@ -31,6 +31,7 @@ Usage
 import csv
 import json
 import random
+import re
 import shutil
 import sys
 from datetime import datetime
@@ -102,24 +103,33 @@ def append_experiment_log(log_path: Path, entry: dict) -> None:
         json.dump(log, f, ensure_ascii=False, indent=2)
 
 
-def append_experiment_csv(csv_path: Path, entry: dict) -> None:
-    cfg = entry["config"]
-    p2  = cfg.get("phase2", {})
-    mo  = cfg.get("model", {})
+FIELDNAMES = [
+    "exp", "run_id", "timestamp", "mean_val_acc", "std_val_acc",
+    "fold0_acc", "fold0_loss", "fold1_acc", "fold1_loss", "fold2_acc", "fold2_loss",
+    "learning_rate", "batch_size", "epochs", "max_length", "seed", "n_folds",
+    "model_name", "hidden_dim", "mlp_hidden", "dropout", "shap_max_evals",
+]
 
+
+def append_experiment_csv(csv_path: Path, entry: dict) -> None:
+    cfg  = entry["config"]
+    p2   = cfg.get("phase2", {})
+    mo   = cfg.get("model", {})
+    ext  = cfg.get("extraction", {})
+
+    fold_data = {r["fold"]: r for r in entry["fold_results"]}
     row = {
-        "experiment":    entry.get("experiment"),
+        "exp":           entry.get("experiment"),
         "run_id":        entry["run_id"],
         "timestamp":     entry["timestamp"],
         "mean_val_acc":  entry["mean_val_acc"],
         "std_val_acc":   entry["std_val_acc"],
-    }
-    for fold_res in entry["fold_results"]:
-        k = fold_res["fold"]
-        row[f"fold{k}_acc"]  = fold_res["best_val_acc"]
-        row[f"fold{k}_loss"] = fold_res["best_val_loss"]
-
-    row.update({
+        "fold0_acc":     fold_data.get(0, {}).get("best_val_acc"),
+        "fold0_loss":    fold_data.get(0, {}).get("best_val_loss"),
+        "fold1_acc":     fold_data.get(1, {}).get("best_val_acc"),
+        "fold1_loss":    fold_data.get(1, {}).get("best_val_loss"),
+        "fold2_acc":     fold_data.get(2, {}).get("best_val_acc"),
+        "fold2_loss":    fold_data.get(2, {}).get("best_val_loss"),
         "learning_rate": p2.get("learning_rate"),
         "batch_size":    p2.get("batch_size"),
         "epochs":        p2.get("epochs"),
@@ -130,11 +140,12 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
         "hidden_dim":    mo.get("hidden_dim"),
         "mlp_hidden":    mo.get("mlp_hidden"),
         "dropout":       mo.get("dropout"),
-    })
+        "shap_max_evals": ext.get("shap_max_evals"),
+    }
 
     write_header = not csv_path.exists()
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         if write_header:
             writer.writeheader()
         writer.writerow(row)
@@ -277,6 +288,12 @@ def extract_shap_key_strings(
     for i, global_idx in enumerate(val_indices):
         text  = all_texts[global_idx]
         label = all_labels[global_idx]
+
+        # Skip texts with < 2 tokens after masking — SHAP clustering requires ≥ 2 words
+        stripped_words = [w for w in re.split(r"\W+", text) if w]
+        if len(stripped_words) < 2:
+            records.append({"fold": fold, "index": global_idx, "label": label, "key_string": " ".join(stripped_words)})
+            continue
 
         sv        = explainer([text], max_evals=shap_max_evals)
         words     = list(sv.data[0])
