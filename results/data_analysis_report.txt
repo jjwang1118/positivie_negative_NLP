@@ -1,0 +1,31 @@
+=============================================================
+   NLP Sentiment Analysis — Data Analysis Report
+   Generated: 2026-04-21
+=============================================================
+
+1. TRAIN / TEST SPLIT
+-------------------------------------------------------------
+  Training samples   :  2,000  (15.4%)
+  Test samples       : 11,000  (84.6%)
+  Total samples      : 13,000  (100.0%)
+
+2. TRAINING DATA LABEL DISTRIBUTION
+-------------------------------------------------------------
+  Negative (label=0) :  1,000  (50.0%)
+  Positive (label=1) :  1,000  (50.0%)
+  Total              :  2,000  (100.0%)
+
+  Ratio (pos / neg)  : 1.000
+  Class imbalance    : No
+
+3. NOTE
+-------------------------------------------------------------
+  Test file (test_no_answer_2022.csv) contains no LABEL
+  column — label analysis is performed on training data only.
+
+4. OUTPUT FILES
+-------------------------------------------------------------
+  results/figures/train_test_split.png
+  results/figures/label_distribution.png
+  results/data_analysis_report.txt
+=============================================================

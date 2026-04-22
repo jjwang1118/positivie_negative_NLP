@@ -1,0 +1,2 @@
+run_id,timestamp,mean_val_acc,std_val_acc,fold0_acc,fold0_loss,fold1_acc,fold1_loss,fold2_acc,fold2_loss,learning_rate,batch_size,epochs,max_length,seed,n_folds,model_name,hidden_dim,mlp_hidden,dropout,shap_max_evals
+01,2026-04-22T13:24:17,0.758,0.0068,0.7541,0.5276,0.7676,0.5104,0.7523,0.5951,0.0002,32,30,128,42,3,sbert-minilm,384,64,0.1,500
