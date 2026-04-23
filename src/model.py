@@ -168,6 +168,87 @@ class SequenceClassifier(nn.Module):
         return self.classifier(self.dropout(cls_vec))   # (B, num_labels)
 
 
+# ---------------------------------------------------------------------------
+# Mean Pooling Classifier (for Exp05 — UDA without attention pooling)
+# ---------------------------------------------------------------------------
+
+class MeanPoolingClassifier(nn.Module):
+    """
+    Mask-aware mean pooling classifier.
+
+    Replaces the learned attention pooling in AttentionPoolingClassifier with
+    simple mean pooling — the aggregation method all-MiniLM-L6-v2 was trained
+    with — reducing trainable parameters and staying faithful to SBERT's design.
+
+    Parameters
+    ----------
+    pretrained_name : str
+        HuggingFace model identifier for the SBERT backbone.
+    hidden_dim : int
+        Output dimension of the SBERT encoder (384 for all-MiniLM-L6-v2).
+    mlp_hidden : int
+        Intermediate dimension of the MLP classification head.
+    dropout : float
+        Dropout probability applied before the final linear layer.
+    num_labels : int
+        Number of output classes (2 for binary sentiment).
+    freeze_encoder : bool
+        If True (default), freeze all SBERT parameters.
+    """
+
+    def __init__(
+        self,
+        pretrained_name: str = "sentence-transformers/all-MiniLM-L6-v2",
+        hidden_dim: int = 384,
+        mlp_hidden: int = 64,
+        dropout: float = 0.1,
+        num_labels: int = 2,
+        freeze_encoder: bool = True,
+    ):
+        super().__init__()
+
+        self.encoder = AutoModel.from_pretrained(pretrained_name)
+        if freeze_encoder:
+            for param in self.encoder.parameters():
+                param.requires_grad = False
+
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_dim, mlp_hidden),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(mlp_hidden, num_labels),
+        )
+
+    def forward(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        token_type_ids: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """
+        Parameters
+        ----------
+        input_ids      : (B, T)
+        attention_mask : (B, T) — 1 for real tokens, 0 for padding
+
+        Returns
+        -------
+        logits : (B, num_labels)
+        """
+        encoder_kwargs = dict(input_ids=input_ids, attention_mask=attention_mask)
+        if token_type_ids is not None:
+            encoder_kwargs["token_type_ids"] = token_type_ids
+
+        outputs = self.encoder(**encoder_kwargs)
+        token_embeddings = outputs.last_hidden_state  # (B, T, H)
+
+        # Mask-aware mean pooling: exclude padding tokens from the average
+        mask = attention_mask.unsqueeze(-1).float()              # (B, T, 1)
+        sentence_vec = (token_embeddings * mask).sum(dim=1) / mask.sum(dim=1)  # (B, H)
+
+        return self.classifier(sentence_vec)
+
+
 def build_model_from_config(hparams: dict, freeze_encoder: bool = True) -> AttentionPoolingClassifier:
     """
     Instantiate AttentionPoolingClassifier from an EXP01_HPARAMS-style dict.
