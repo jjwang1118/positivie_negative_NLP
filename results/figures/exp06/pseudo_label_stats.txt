@@ -1,0 +1,16 @@
+K-means Cluster Analysis
+========================================
+n_clusters              : 100
+min_labeled_per_cluster : 3
+
+Mean cluster purity     : 0.7607
+Median cluster purity   : 0.7500
+
+Threshold sweep:
+  purity ≥ 0.60 →  59 clusters,  8668 pseudo-labels (78.8%)
+  purity ≥ 0.70 →  34 clusters,  4685 pseudo-labels (42.6%)
+  purity ≥ 0.75 →  31 clusters,  4082 pseudo-labels (37.1%)
+  purity ≥ 0.80 →  26 clusters,  3368 pseudo-labels (30.6%)
+  purity ≥ 0.85 →  16 clusters,  2076 pseudo-labels (18.9%)
+  purity ≥ 0.90 →  11 clusters,  1126 pseudo-labels (10.2%)
+  purity ≥ 1.00 →   6 clusters,   256 pseudo-labels (2.3%)

@@ -1,0 +1,16 @@
+K-means Cluster Analysis  [siebert/sentiment-roberta-large-english]
+==================================================
+n_clusters              : 100
+min_labeled_per_cluster : 3
+
+Mean cluster purity     : 0.8199
+Median cluster purity   : 0.8571
+
+Threshold sweep:
+  purity ≥ 0.60 →  85 clusters, 10059 pseudo-labels (91.4%)
+  purity ≥ 0.70 →  66 clusters,  8074 pseudo-labels (73.4%)
+  purity ≥ 0.75 →  62 clusters,  7602 pseudo-labels (69.1%)
+  purity ≥ 0.80 →  53 clusters,  6632 pseudo-labels (60.3%)
+  purity ≥ 0.85 →  47 clusters,  5995 pseudo-labels (54.5%)
+  purity ≥ 0.90 →  37 clusters,  4449 pseudo-labels (40.4%)
+  purity ≥ 1.00 →  16 clusters,  1956 pseudo-labels (17.8%)

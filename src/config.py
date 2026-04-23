@@ -28,6 +28,9 @@ MODEL_REGISTRY = {
     # Experiment 01 backbone (frozen SBERT encoder)
     "sbert-minilm":  "sentence-transformers/all-MiniLM-L6-v2",
 
+    # Experiment 07 backbone (sentiment-fine-tuned RoBERTa-large, 1024-dim)
+    "sentiment-roberta-large": "siebert/sentiment-roberta-large-english",
+
     # General BERT-family baselines (available for future experiments)
     "bert-base":     "bert-base-uncased",
     "bert-large":    "bert-large-uncased",
