@@ -1,18 +1,19 @@
 """
-exp/exp03_finetune/predict.py
-==============================
-Ensemble prediction using the 3-fold RoBERTa models trained in exp03.
+exp/exp04_uda/predict.py
+========================
+Ensemble prediction for the UDA experiment (exp04).
 
-Ensemble strategy: average softmax probabilities across all fold models,
-then argmax to obtain the final label.
+Loads the best.pt checkpoint from each of the 5 cross-validation folds,
+runs inference on tests/test.csv, averages the softmax probabilities, and
+writes predictions.csv to the run directory.
 
-Output: results/exp03/{run_id}/predictions.csv
-Format: row_id,LABEL
+Output format matches exp01–03:
+  row_id,predicted_label
 
 Usage
 -----
-    python exp/exp03_finetune/predict.py            # latest run
-    python exp/exp03_finetune/predict.py --run 01
+    python exp/exp04_uda/predict.py            # uses the latest run
+    python exp/exp04_uda/predict.py --run 01   # uses a specific run
 """
 
 import argparse
@@ -30,24 +31,16 @@ EXP_DIR      = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.config import MODEL_REGISTRY, RESULTS_DIR, TEST_FILE
-from src.model import SequenceClassifier
+from src.model import AttentionPoolingClassifier
 
 
 # ---------------------------------------------------------------------------
-# Config
+# Config helpers
 # ---------------------------------------------------------------------------
 
 def load_config(path: Path) -> dict:
     with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
-
-
-def flatten_config(cfg: dict) -> dict:
-    flat = {}
-    for section in cfg.values():
-        if isinstance(section, dict):
-            flat.update(section)
-    return flat
 
 
 # ---------------------------------------------------------------------------
@@ -61,6 +54,11 @@ def resolve_run_dir(exp_results_dir: Path, run_id: str | None) -> tuple[Path, st
             raise FileNotFoundError(f"Run directory not found: {run_dir}")
         return run_dir, run_id
 
+    if not exp_results_dir.exists():
+        raise FileNotFoundError(
+            f"No results directory found: {exp_results_dir}\n"
+            "Run train.py first to generate a run."
+        )
     existing = sorted(
         [d.name for d in exp_results_dir.iterdir() if d.is_dir() and d.name.isdigit()],
         key=int,
@@ -86,12 +84,12 @@ def load_test_csv(path: Path) -> tuple[list[str], list[str]]:
     return row_ids, texts
 
 
-def tokenise(texts: list[str], tokenizer, max_length: int) -> dict:
+def tokenize_texts(texts: list[str], tokenizer, max_length: int) -> dict:
     return tokenizer(
         texts,
+        max_length=max_length,
         padding="max_length",
         truncation=True,
-        max_length=max_length,
         return_tensors="pt",
     )
 
@@ -101,72 +99,92 @@ def tokenise(texts: list[str], tokenizer, max_length: int) -> dict:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--run", type=str, default=None, help="Run ID (e.g. 01). Defaults to latest.")
+    parser = argparse.ArgumentParser(description="UDA exp04 ensemble predictor")
+    parser.add_argument(
+        "--run",
+        type=str,
+        default=None,
+        help="Run ID to load checkpoints from (e.g. '01'). Defaults to latest.",
+    )
     args = parser.parse_args()
 
     cfg    = load_config(EXP_DIR / "config.yaml")
-    hp     = flatten_config(cfg)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    mo = cfg["model"]
+    tr = cfg["training"]
 
     exp_name        = cfg["experiment"]["name"]
     exp_results_dir = RESULTS_DIR / exp_name
     run_dir, run_id = resolve_run_dir(exp_results_dir, args.run)
 
-    print(f"Experiment : {exp_name}")
-    print(f"Run        : {run_id}")
-    print(f"Device     : {device}")
+    print(f"Experiment  : {exp_name}")
+    print(f"Run         : {run_id}")
+    print(f"Run dir     : {run_dir}")
+    print(f"Device      : {device}")
 
-    pretrained = MODEL_REGISTRY[hp["name"]]
+    pretrained = MODEL_REGISTRY[mo["name"]]
     tokenizer  = AutoTokenizer.from_pretrained(pretrained)
 
     if not TEST_FILE.exists():
         raise FileNotFoundError(f"Test file not found: {TEST_FILE}")
     row_ids, test_texts = load_test_csv(TEST_FILE)
-    print(f"Test samples: {len(test_texts)}")
+    print(f"\nTest samples: {len(test_texts)}")
 
-    enc = tokenise(test_texts, tokenizer, hp["max_length"])
+    # Tokenize all test texts once
+    enc            = tokenize_texts(test_texts, tokenizer, tr["max_length"])
     input_ids      = enc["input_ids"].to(device)
     attention_mask = enc["attention_mask"].to(device)
 
-    n_folds    = hp["n_folds"]
+    n_folds   = tr["n_folds"]
     all_probs: list[np.ndarray] = []
 
+    print(f"\nRunning ensemble over {n_folds} folds...")
     for fold in range(n_folds):
         ckpt_path = run_dir / f"fold{fold}" / "best.pt"
         if not ckpt_path.exists():
-            raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
+            raise FileNotFoundError(
+                f"Checkpoint not found for fold {fold}: {ckpt_path}\n"
+                "Run train.py first."
+            )
 
-        model = SequenceClassifier(
+        model = AttentionPoolingClassifier(
             pretrained_name=pretrained,
-            hidden_dim=hp["hidden_dim"],
-            dropout=hp["dropout"],
-            num_labels=hp["num_labels"],
+            hidden_dim=mo["hidden_dim"],
+            mlp_hidden=mo["mlp_hidden"],
+            dropout=mo["dropout"],
+            num_labels=mo["num_labels"],
+            freeze_encoder=True,
         ).to(device)
-        model.load_state_dict(torch.load(ckpt_path, map_location=device, weights_only=True))
+        model.load_state_dict(
+            torch.load(str(ckpt_path), map_location=device, weights_only=True)
+        )
         model.eval()
         print(f"  Loaded fold {fold}: {ckpt_path}")
 
         with torch.no_grad():
             logits = model(input_ids=input_ids, attention_mask=attention_mask)
-            probs  = torch.softmax(logits, dim=-1).cpu().numpy()
+            probs  = torch.softmax(logits, dim=-1).cpu().numpy()  # (N, K)
         all_probs.append(probs)
 
-    ensemble_probs = np.mean(all_probs, axis=0)
+    # Ensemble: average softmax probabilities, then argmax
+    ensemble_probs = np.mean(all_probs, axis=0)   # (N, K)
     predictions    = ensemble_probs.argmax(axis=1).tolist()
 
+    # Write predictions
     out_path = run_dir / "predictions.csv"
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["row_id", "LABEL"])
+        writer.writerow(["row_id", "predicted_label"])
         for rid, pred in zip(row_ids, predictions):
             writer.writerow([rid, pred])
 
-    print(f"\nPredictions saved to: {out_path}")
-    print(f"  Total predictions : {len(predictions)}")
     pos = sum(predictions)
-    print(f"  Positive (1)      : {pos}  ({pos / len(predictions):.1%})")
-    print(f"  Negative (0)      : {len(predictions) - pos}  ({(len(predictions) - pos) / len(predictions):.1%})")
+    neg = len(predictions) - pos
+    print(f"\nPredictions saved: {out_path}")
+    print(f"  Total     : {len(predictions)}")
+    print(f"  Positive  : {pos}  ({pos / len(predictions):.1%})")
+    print(f"  Negative  : {neg}  ({neg / len(predictions):.1%})")
 
 
 if __name__ == "__main__":

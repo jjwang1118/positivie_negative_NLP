@@ -1,3 +1,5 @@
-experiment,run,prediction,note
-exp01,01,73.801,
-exp02,03,70.991,
+experiment,run,prediction,p_num,n_num,note
+exp01,01,73.801,5420,5580,
+exp02,03,70.991,5978,5022,
+exp03,01,73.195,5419,5581,
+exp03,02,73.526,5208,5792,

@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 NLP 情緒分析實驗，判斷文本為正面或負面情緒的二元分類任務。
+(**Note: 此專案不能使用LLM模型，除了BERT類型的模型以外，其他如GPT、Claude等生成式模型不適用)
 
 - Label `1` = positive
 - Label `0` = negative
@@ -41,8 +42,7 @@ exp/          # 以下會存放各實驗編號資料夾，檔案包含實驗流�
 
 - `src/` 放可重用的 pipeline 元件（preprocess、model、evaluate）
 - `notebooks/` 做探索性分析，成熟後的邏輯移入 `src/`
-- `results/` 不納入 git（已加入 .gitignore）
-
+- `results/` 如果要推上github，個個實驗只需要推最外層和內層的空資料夾以及```yaml```、```json```、```md```、```csv```等文字檔，避免推上大檔案（如模型 checkpoint）
 ## Agents
 
 各 agent 定義在對應目錄的 `SKILL.md`，建議依下列順序使用：
