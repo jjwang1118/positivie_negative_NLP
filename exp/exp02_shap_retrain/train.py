@@ -105,9 +105,13 @@ def append_experiment_log(log_path: Path, entry: dict) -> None:
 
 FIELDNAMES = [
     "exp", "run_id", "timestamp", "mean_val_acc", "std_val_acc",
-    "fold0_acc", "fold0_loss", "fold1_acc", "fold1_loss", "fold2_acc", "fold2_loss",
+    "fold0_acc", "fold0_loss", "fold1_acc", "fold1_loss",
+    "fold2_acc", "fold2_loss", "fold3_acc", "fold3_loss",
+    "fold4_acc", "fold4_loss",
     "learning_rate", "batch_size", "epochs", "max_length", "seed", "n_folds",
-    "model_name", "hidden_dim", "mlp_hidden", "dropout", "shap_max_evals",
+    "model_name", "hidden_dim", "mlp_hidden", "dropout",
+    "shap_max_evals",
+    "lambda_u", "confidence_threshold", "tsa_schedule", "augment_prob",
 ]
 
 
@@ -131,6 +135,10 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
         "fold1_loss":    fold_data.get(1, {}).get("best_val_loss"),
         "fold2_acc":     fold_data.get(2, {}).get("best_val_acc"),
         "fold2_loss":    fold_data.get(2, {}).get("best_val_loss"),
+        "fold3_acc":     fold_data.get(3, {}).get("best_val_acc"),
+        "fold3_loss":    fold_data.get(3, {}).get("best_val_loss"),
+        "fold4_acc":     fold_data.get(4, {}).get("best_val_acc"),
+        "fold4_loss":    fold_data.get(4, {}).get("best_val_loss"),
         "learning_rate": p2.get("learning_rate"),
         "batch_size":    p2.get("batch_size"),
         "epochs":        p2.get("epochs"),
@@ -142,6 +150,10 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
         "mlp_hidden":    mo.get("mlp_hidden"),
         "dropout":       mo.get("dropout"),
         "shap_max_evals": ext.get("shap_max_evals"),
+        "lambda_u":            "",
+        "confidence_threshold": "",
+        "tsa_schedule":        "",
+        "augment_prob":        "",
     }
 
     write_header = not csv_path.exists()
@@ -149,7 +161,7 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         if write_header:
             writer.writeheader()
-        writer.writerow(row)
+        writer.writerow({k: row.get(k, "") for k in FIELDNAMES})
 
 
 # ---------------------------------------------------------------------------

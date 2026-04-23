@@ -95,6 +95,18 @@ def append_experiment_log(log_path: Path, entry: dict) -> None:
         json.dump(log, f, ensure_ascii=False, indent=2)
 
 
+FIELDNAMES = [
+    "exp", "run_id", "timestamp", "mean_val_acc", "std_val_acc",
+    "fold0_acc", "fold0_loss", "fold1_acc", "fold1_loss",
+    "fold2_acc", "fold2_loss", "fold3_acc", "fold3_loss",
+    "fold4_acc", "fold4_loss",
+    "learning_rate", "batch_size", "epochs", "max_length", "seed", "n_folds",
+    "model_name", "hidden_dim", "mlp_hidden", "dropout",
+    "shap_max_evals",
+    "lambda_u", "confidence_threshold", "tsa_schedule", "augment_prob",
+]
+
+
 def append_experiment_csv(csv_path: Path, entry: dict) -> None:
     """Append one row per run to experiment_log.csv (one row = one run summary)."""
     cfg = entry["config"]
@@ -102,37 +114,46 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
     mo  = cfg.get("model", {})
     ex  = cfg.get("extraction", {})
 
+    fold_data = {r["fold"]: r for r in entry["fold_results"]}
     row = {
-        "run_id":            entry["run_id"],
-        "timestamp":         entry["timestamp"],
-        "mean_val_acc":      entry["mean_val_acc"],
-        "std_val_acc":       entry["std_val_acc"],
+        "exp":                  entry.get("experiment"),
+        "run_id":               entry["run_id"],
+        "timestamp":            entry["timestamp"],
+        "mean_val_acc":         entry["mean_val_acc"],
+        "std_val_acc":          entry["std_val_acc"],
+        "fold0_acc":            fold_data.get(0, {}).get("best_val_acc"),
+        "fold0_loss":           fold_data.get(0, {}).get("best_val_loss"),
+        "fold1_acc":            fold_data.get(1, {}).get("best_val_acc"),
+        "fold1_loss":           fold_data.get(1, {}).get("best_val_loss"),
+        "fold2_acc":            fold_data.get(2, {}).get("best_val_acc"),
+        "fold2_loss":           fold_data.get(2, {}).get("best_val_loss"),
+        "fold3_acc":            fold_data.get(3, {}).get("best_val_acc"),
+        "fold3_loss":           fold_data.get(3, {}).get("best_val_loss"),
+        "fold4_acc":            fold_data.get(4, {}).get("best_val_acc"),
+        "fold4_loss":           fold_data.get(4, {}).get("best_val_loss"),
+        "learning_rate":        tr.get("learning_rate"),
+        "batch_size":           tr.get("batch_size"),
+        "epochs":               tr.get("epochs"),
+        "max_length":           tr.get("max_length"),
+        "seed":                 tr.get("seed"),
+        "n_folds":              tr.get("n_folds"),
+        "model_name":           mo.get("name"),
+        "hidden_dim":           mo.get("hidden_dim"),
+        "mlp_hidden":           mo.get("mlp_hidden"),
+        "dropout":              mo.get("dropout"),
+        "shap_max_evals":       ex.get("shap_max_evals"),
+        "lambda_u":             "",
+        "confidence_threshold": "",
+        "tsa_schedule":         "",
+        "augment_prob":         "",
     }
-    for fold_res in entry["fold_results"]:
-        k = fold_res["fold"]
-        row[f"fold{k}_acc"]  = fold_res["best_val_acc"]
-        row[f"fold{k}_loss"] = fold_res["best_val_loss"]
-
-    row.update({
-        "learning_rate":    tr.get("learning_rate"),
-        "batch_size":       tr.get("batch_size"),
-        "epochs":           tr.get("epochs"),
-        "max_length":       tr.get("max_length"),
-        "seed":             tr.get("seed"),
-        "n_folds":          tr.get("n_folds"),
-        "model_name":       mo.get("name"),
-        "hidden_dim":       mo.get("hidden_dim"),
-        "mlp_hidden":       mo.get("mlp_hidden"),
-        "dropout":          mo.get("dropout"),
-        "shap_max_evals":   ex.get("shap_max_evals"),
-    })
 
     write_header = not csv_path.exists()
     with open(csv_path, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=list(row.keys()))
+        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         if write_header:
             writer.writeheader()
-        writer.writerow(row)
+        writer.writerow({k: row.get(k, "") for k in FIELDNAMES})
 
 
 # ---------------------------------------------------------------------------

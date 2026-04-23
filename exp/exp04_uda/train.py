@@ -107,6 +107,7 @@ FIELDNAMES = [
     "fold4_acc", "fold4_loss",
     "learning_rate", "batch_size", "epochs", "max_length", "seed", "n_folds",
     "model_name", "hidden_dim", "mlp_hidden", "dropout",
+    "shap_max_evals",
     "lambda_u", "confidence_threshold", "tsa_schedule", "augment_prob",
 ]
 
@@ -143,8 +144,7 @@ def append_experiment_csv(csv_path: Path, entry: dict) -> None:
         "model_name":          mo.get("name"),
         "hidden_dim":          mo.get("hidden_dim"),
         "mlp_hidden":          mo.get("mlp_hidden"),
-        "dropout":             mo.get("dropout"),
-        "lambda_u":            uda.get("lambda_u"),
+        "dropout":             mo.get("dropout"),        "shap_max_evals":       "",        "lambda_u":            uda.get("lambda_u"),
         "confidence_threshold": uda.get("confidence_threshold"),
         "tsa_schedule":        uda.get("tsa_schedule"),
         "augment_prob":        uda.get("augment_prob"),

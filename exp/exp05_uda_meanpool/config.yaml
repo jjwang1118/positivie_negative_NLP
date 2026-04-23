@@ -17,8 +17,8 @@ training:
   n_folds: 5
 
 uda:
-  lambda_u: 1.0
-  confidence_threshold: 0.8
-  tsa_schedule: linear
-  augment_prob: 0.1
+  lambda_u: 0.5
+  confidence_threshold: 0.9
+  tsa_schedule: log
+  augment_prob: 0.2
   unlabeled_batch_size: 32
