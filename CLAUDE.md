@@ -42,7 +42,7 @@ exp/          # 以下會存放各實驗編號資料夾，檔案包含實驗流�
 
 - `src/` 放可重用的 pipeline 元件（preprocess、model、evaluate）
 - `notebooks/` 做探索性分析，成熟後的邏輯移入 `src/`
-- `results/` 如果要推上github，個個實驗只需要推最外層和內層的空資料夾以及```yaml```、```json```、```md```、```csv```等文字檔，避免推上大檔案（如模型 checkpoint）
+- `results/` 如果要推上github，個個實驗只需要推最外層和內層的空資料夾以及```yaml```、```json```、```md```、```csv```等文字檔和```png```、```jpg```等照片檔，避免推上大檔案（如模型 checkpoint）
 ## Agents
 
 各 agent 定義在對應目錄的 `SKILL.md`，建議依下列順序使用：

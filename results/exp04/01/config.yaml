@@ -18,7 +18,7 @@ training:
   n_folds: 5
 
 uda:
-  lambda_u: 0.5             # consistency loss weight total_loss = sup_loss + lambda_u × con_loss
+  lambda_u: 0.6              # consistency loss weight total_loss = sup_loss + lambda_u × con_loss
   confidence_threshold: 0.9   # unlabeled samples with max(p) < threshold are filtered out
   tsa_schedule: log       # Training Signal Annealing (TSA) schedule: linear / log / exp
   augment_prob: 0.3           # probability of replacing each low-TF-IDF token

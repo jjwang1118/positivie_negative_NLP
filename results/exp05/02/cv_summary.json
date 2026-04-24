@@ -1,0 +1,66 @@
+{
+  "experiment": "exp05",
+  "run_id": "02",
+  "timestamp": "2026-04-23T13:51:44",
+  "config": {
+    "experiment": {
+      "name": "exp05"
+    },
+    "model": {
+      "name": "sbert-minilm",
+      "hidden_dim": 384,
+      "mlp_hidden": 64,
+      "dropout": 0.1,
+      "num_labels": 2
+    },
+    "training": {
+      "learning_rate": 0.0002,
+      "batch_size": 32,
+      "epochs": 30,
+      "max_length": 128,
+      "seed": 42,
+      "n_folds": 5
+    },
+    "uda": {
+      "lambda_u": 0.5,
+      "confidence_threshold": 0.9,
+      "tsa_schedule": "linear",
+      "augment_prob": 0.2,
+      "unlabeled_batch_size": 32
+    }
+  },
+  "fold_results": [
+    {
+      "fold": 0,
+      "best_val_acc": 0.74,
+      "best_val_loss": 0.5505,
+      "best_val_f1": 0.74
+    },
+    {
+      "fold": 1,
+      "best_val_acc": 0.78,
+      "best_val_loss": 0.5952,
+      "best_val_f1": 0.78
+    },
+    {
+      "fold": 2,
+      "best_val_acc": 0.75,
+      "best_val_loss": 0.5467,
+      "best_val_f1": 0.75
+    },
+    {
+      "fold": 3,
+      "best_val_acc": 0.7675,
+      "best_val_loss": 0.5464,
+      "best_val_f1": 0.7673
+    },
+    {
+      "fold": 4,
+      "best_val_acc": 0.75,
+      "best_val_loss": 0.5778,
+      "best_val_f1": 0.7498
+    }
+  ],
+  "mean_val_acc": 0.7575,
+  "std_val_acc": 0.0143
+}

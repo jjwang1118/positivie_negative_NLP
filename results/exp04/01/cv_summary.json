@@ -1,0 +1,67 @@
+{
+  "experiment": "exp04",
+  "run_id": "01",
+  "timestamp": "2026-04-23T14:10:34",
+  "config": {
+    "experiment": {
+      "name": "exp04",
+      "description": "UDA (Unsupervised Data Augmentation) — semi-supervised training with TSA + TF-IDF augmentation + KL consistency loss"
+    },
+    "model": {
+      "name": "sbert-minilm",
+      "hidden_dim": 384,
+      "mlp_hidden": 64,
+      "dropout": 0.1,
+      "num_labels": 2
+    },
+    "training": {
+      "learning_rate": 0.0002,
+      "batch_size": 32,
+      "epochs": 30,
+      "max_length": 128,
+      "seed": 42,
+      "n_folds": 5
+    },
+    "uda": {
+      "lambda_u": 0.6,
+      "confidence_threshold": 0.9,
+      "tsa_schedule": "log",
+      "augment_prob": 0.3,
+      "unlabeled_batch_size": 32
+    }
+  },
+  "fold_results": [
+    {
+      "fold": 0,
+      "best_val_acc": 0.745,
+      "best_val_loss": 0.5497,
+      "best_val_f1": 0.745
+    },
+    {
+      "fold": 1,
+      "best_val_acc": 0.775,
+      "best_val_loss": 0.503,
+      "best_val_f1": 0.7749
+    },
+    {
+      "fold": 2,
+      "best_val_acc": 0.7675,
+      "best_val_loss": 0.5167,
+      "best_val_f1": 0.7674
+    },
+    {
+      "fold": 3,
+      "best_val_acc": 0.755,
+      "best_val_loss": 0.5217,
+      "best_val_f1": 0.7544
+    },
+    {
+      "fold": 4,
+      "best_val_acc": 0.7625,
+      "best_val_loss": 0.5299,
+      "best_val_f1": 0.7625
+    }
+  ],
+  "mean_val_acc": 0.761,
+  "std_val_acc": 0.0103
+}

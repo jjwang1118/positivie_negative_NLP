@@ -1,0 +1,24 @@
+# ── Core ML / NLP ──────────────────────────────────────────────────────────────
+torch>=2.6.0                  # PyTorch (install GPU build via conda, see environment.yml)
+transformers>=4.50.0           # Hugging Face Transformers (RoBERTa, tokenizers)
+tokenizers>=0.21.0             # Fast tokenizer backend
+scikit-learn>=1.6.0            # StratifiedKFold, metrics
+shap>=0.47.0                  # SHAP explainability (exp01, exp02)
+numpy>=1.26.0                  # Array operations
+
+# ── Data & Visualisation ───────────────────────────────────────────────────────
+pandas>=2.2.0                  # DataFrame utilities, CSV I/O
+matplotlib>=3.9.0              # Plotting (results/figures/)
+seaborn>=0.13.0                # Statistical plots
+
+# ── Config & Utilities ─────────────────────────────────────────────────────────
+PyYAML>=6.0.2                  # config.yaml parsing
+tqdm>=4.67.0                   # Progress bars
+
+# ── Notebooks ──────────────────────────────────────────────────────────────────
+jupyter>=1.1.0
+ipykernel>=6.29.0
+
+# ── Testing ────────────────────────────────────────────────────────────────────
+pytest>=8.3.0
+pytest-cov>=6.0.0
