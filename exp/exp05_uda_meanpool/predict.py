@@ -153,7 +153,7 @@ def main() -> None:
     out_path = run_dir / "predictions.csv"
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["row_id", "predicted_label"])
+        writer.writerow(["row_id", "LABEL"])
         for rid, pred in zip(row_ids, predictions):
             writer.writerow([rid, pred])
 
