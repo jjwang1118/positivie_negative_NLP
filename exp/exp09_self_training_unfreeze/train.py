@@ -327,10 +327,9 @@ def train_epoch(
         mask   = batch["attention_mask"].to(device)
         labels = batch["label"].to(device)
 
+        optimizer.zero_grad()
         logits = model(ids, mask)
         loss   = criterion(logits, labels)
-
-        optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
@@ -513,6 +512,10 @@ def run_fold(
         f"(threshold={s1['confidence_threshold']})"
     )
 
+    # Free Stage 1 model from GPU before building Stage 2
+    del model_s1, optimizer_s1, criterion_s1
+    torch.cuda.empty_cache()
+
     # ── Stage 2: Partial unfreeze + S1 pseudo-labels ──────────────────────
     train_texts_s2  = train_texts_l  + pseudo_texts_s1
     train_labels_s2 = train_labels_l + pseudo_labels_s1
@@ -573,6 +576,10 @@ def run_fold(
             f"pseudo_S2={n_pseudo_s2}/{len(unlabeled_texts)} "
             f"(threshold={s2['confidence_threshold']})"
         )
+
+        # Free Stage 2 model from GPU before building Stage 3
+        del model_s2, optimizer_s2, criterion_s2
+        torch.cuda.empty_cache()
 
         train_texts_s3  = train_texts_l  + pseudo_texts_s2
         train_labels_s3 = train_labels_l + pseudo_labels_s2
