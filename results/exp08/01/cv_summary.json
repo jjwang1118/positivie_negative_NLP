@@ -1,0 +1,73 @@
+{
+  "experiment": "exp08",
+  "run_id": "01",
+  "timestamp": "2026-04-24T14:48:22",
+  "config": {
+    "experiment": {
+      "name": "exp08"
+    },
+    "model": {
+      "name": "sentiment-roberta-large",
+      "hidden_dim": 1024,
+      "mlp_hidden": 64,
+      "dropout": 0.1,
+      "num_labels": 2
+    },
+    "training": {
+      "learning_rate": 0.0001,
+      "batch_size": 32,
+      "epochs": 30,
+      "max_length": 128,
+      "seed": 42,
+      "n_folds": 5,
+      "label_smoothing": 0.1,
+      "warmup_ratio": 0.1
+    },
+    "clustering": {
+      "n_clusters": 130,
+      "purity_threshold": 0.9,
+      "min_labeled_per_cluster": 10,
+      "random_state": 42
+    }
+  },
+  "fold_results": [
+    {
+      "fold": 0,
+      "best_val_acc": 0.8625,
+      "best_val_loss": 0.4548,
+      "best_val_f1": 0.8625,
+      "n_pseudo": 4087
+    },
+    {
+      "fold": 1,
+      "best_val_acc": 0.8675,
+      "best_val_loss": 0.4635,
+      "best_val_f1": 0.8675,
+      "n_pseudo": 4583
+    },
+    {
+      "fold": 2,
+      "best_val_acc": 0.8475,
+      "best_val_loss": 0.4698,
+      "best_val_f1": 0.8475,
+      "n_pseudo": 4343
+    },
+    {
+      "fold": 3,
+      "best_val_acc": 0.8425,
+      "best_val_loss": 0.4932,
+      "best_val_f1": 0.8422,
+      "n_pseudo": 4028
+    },
+    {
+      "fold": 4,
+      "best_val_acc": 0.8575,
+      "best_val_loss": 0.4448,
+      "best_val_f1": 0.8575,
+      "n_pseudo": 3890
+    }
+  ],
+  "mean_val_acc": 0.8555,
+  "std_val_acc": 0.0093,
+  "mean_pseudo_labels": 4186.2
+}

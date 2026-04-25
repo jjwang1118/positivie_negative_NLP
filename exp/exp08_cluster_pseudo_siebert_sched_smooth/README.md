@@ -56,7 +56,7 @@ training:
   warmup_ratio: 0.1
 
 clustering:
-  n_clusters: 100
+  n_clusters: 150
   purity_threshold: 0.8
   min_labeled_per_cluster: 3
 ```
