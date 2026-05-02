@@ -67,10 +67,9 @@
   \begin{center}
     {\Large\bfseries NLP Sentiment Analysis Report}\\[6pt]
     \begin{tabular}{cccc}
-      Author A & Author B & Author C & Author D \\
-      \small ID-001 & \small ID-002 & \small ID-003 & \small ID-004 \\
-      \small \texttt{a@example.com} & \small \texttt{b@example.com}
-        & \small \texttt{c@example.com} & \small \texttt{d@example.com}
+      Author A \\
+      \small 114423002  \\
+      \small \texttt{jjwang1118@gmail.com} 
     \end{tabular}
   \end{center}
   \vspace{4pt}
@@ -154,11 +153,28 @@ effective benefit.
 
 To investigate the effects of different pseudo-labeling strategies, this
 study designs and compares two RoBERTa-large-based training schemes.
-\textbf{EXP01} adopts a three-stage progressive unfreezing pipeline.
-\textbf{EXP02} adopts a two-stage strategy using full pseudo-labels with
-balanced class weights and Early Stopping. By controlling all other
-conditions, this study compares the performance difference between the
-two pseudo-labeling strategies in a low-resource sentiment analysis task.
+\textbf{EXP01} (Figure~\ref{fig:exp01}) adopts a three-stage progressive
+unfreezing pipeline. \textbf{EXP02} (Figure~\ref{fig:exp02}) adopts a
+two-stage strategy using full pseudo-labels with balanced class weights
+and Early Stopping. By controlling all other conditions, this study
+compares the performance difference between the two pseudo-labeling
+strategies in a low-resource sentiment analysis task.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{exp09-05.png}
+  \caption{EXP01 pipeline: three-stage self-training with progressive
+    encoder unfreezing (exp09-05).}
+  \label{fig:exp01}
+\end{figure}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\columnwidth]{exp11-01.png}
+  \caption{EXP02 pipeline: two-stage full pseudo-label strategy with
+    balanced class weights and Early Stopping (exp11-01).}
+  \label{fig:exp02}
+\end{figure}
 
 %% ════════════════════════════════════════════════════════════════════════════════
 \section{Methodology}
