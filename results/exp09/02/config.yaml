@@ -2,7 +2,7 @@ experiment:
   name: exp09
 
 model:
-  name: roberta-large
+  name: sentiment-roberta-large
   hidden_dim: 1024
   mlp_hidden: 64
   dropout: 0.1
@@ -10,34 +10,31 @@ model:
 
 # Stage 1: Frozen encoder, labeled data only
 # Goal: generate high-quality initial pseudo-labels via model confidence
-# [run02] learning_rate: 1.0e-4 | epochs: 20 | confidence_threshold: 0.95 → n_pseudo_s1=0 (threshold too strict)
 stage1:
   learning_rate: 1.0e-4
   batch_size: 32
-  epochs: 10
+  epochs: 20
   max_length: 128
   seed: 42
   n_folds: 5
   label_smoothing: 0.1
   warmup_ratio: 0.1
-  confidence_threshold: 0.90   # was 0.95 → n_pseudo_s1=0 all folds; lowered to activate self-training
+  confidence_threshold: 0.95   # only top-confidence samples become pseudo-labels
 
 # Stage 2: Partial encoder unfreeze + Stage 1 pseudo-labels
 # Goal: adapt encoder representations to this dataset
-# [run02] encoder_lr: 5e-6 | head_lr: 1e-4 | epochs: 20 | unfreeze_last_n: 3 → S2 acc == S1 acc (no pseudo-labels fed in)
 stage2:
-  encoder_lr: 1.0e-5            # was 5e-6; slightly increased to allow faster encoder adaptation
+  encoder_lr: 5.0e-6            # 20x smaller than head — prevents catastrophic forgetting
   head_lr: 1.0e-4
   batch_size: 32
-  epochs: 10
+  epochs: 20
   max_length: 128
   label_smoothing: 0.1
   warmup_ratio: 0.1
   unfreeze_last_n: 3            # unfreeze last 3 of 24 RoBERTa-large layers
-  confidence_threshold: 0.9   # was 0.90; slightly stricter to keep S3 pseudo-label quality
+  confidence_threshold: 0.90   # slightly relaxed threshold for stage3
 
 # Stage 3 (optional): Final refinement with Stage 2 pseudo-labels
-# [run02] encoder_lr: 2e-6 | head_lr: 5e-5 | epochs: 15 → mean_pseudo_s2=4377, mean_val_acc=0.8565
 stage3:
   enabled: true
   encoder_lr: 2.0e-6

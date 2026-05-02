@@ -86,7 +86,7 @@ structure-manager → data-analyzer → paper-collector
 - 推上去的內容:
       1. data/
       2. exp/ 推exp09 和 exp11的資料夾，裡面包含 PLAN.md 和訓練腳本
-      3. results/ 推 exp09 和 exp11的資料夾和外層檔案，裡面包含實驗輸出、圖表、json、csv、metrics等文字檔和照片檔，但不包含模型 checkpoint
+      3. results/ 推 09/05 和 11/01的資料夾和外層檔案，裡面包含實驗輸出、圖表、json、csv、metrics等文字檔和照片檔，但不包含模型 checkpoint
       4.  src/ 
       5. tests/
       6. 最外層所有檔案，並將claude.md寫入readme.md 

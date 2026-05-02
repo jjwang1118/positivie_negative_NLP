@@ -1,0 +1,100 @@
+{
+  "experiment": "exp09",
+  "run_id": "02",
+  "timestamp": "2026-04-26T04:49:00",
+  "config": {
+    "experiment": {
+      "name": "exp09"
+    },
+    "model": {
+      "name": "sentiment-roberta-large",
+      "hidden_dim": 1024,
+      "mlp_hidden": 64,
+      "dropout": 0.1,
+      "num_labels": 2
+    },
+    "stage1": {
+      "learning_rate": 0.0001,
+      "batch_size": 32,
+      "epochs": 20,
+      "max_length": 128,
+      "seed": 42,
+      "n_folds": 5,
+      "label_smoothing": 0.1,
+      "warmup_ratio": 0.1,
+      "confidence_threshold": 0.95
+    },
+    "stage2": {
+      "encoder_lr": 5e-06,
+      "head_lr": 0.0001,
+      "batch_size": 32,
+      "epochs": 20,
+      "max_length": 128,
+      "label_smoothing": 0.1,
+      "warmup_ratio": 0.1,
+      "unfreeze_last_n": 3,
+      "confidence_threshold": 0.9
+    },
+    "stage3": {
+      "enabled": true,
+      "encoder_lr": 2e-06,
+      "head_lr": 5e-05,
+      "batch_size": 32,
+      "epochs": 15,
+      "max_length": 128,
+      "label_smoothing": 0.1,
+      "warmup_ratio": 0.05
+    }
+  },
+  "fold_results": [
+    {
+      "fold": 0,
+      "best_val_acc": 0.865,
+      "best_val_loss": 0.4517,
+      "stage1_acc": 0.8625,
+      "stage2_acc": 0.8625,
+      "n_pseudo_s1": 0,
+      "n_pseudo_s2": 3349
+    },
+    {
+      "fold": 1,
+      "best_val_acc": 0.865,
+      "best_val_loss": 0.4532,
+      "stage1_acc": 0.865,
+      "stage2_acc": 0.865,
+      "n_pseudo_s1": 0,
+      "n_pseudo_s2": 4612
+    },
+    {
+      "fold": 2,
+      "best_val_acc": 0.8525,
+      "best_val_loss": 0.4709,
+      "stage1_acc": 0.8525,
+      "stage2_acc": 0.85,
+      "n_pseudo_s1": 0,
+      "n_pseudo_s2": 4597
+    },
+    {
+      "fold": 3,
+      "best_val_acc": 0.84,
+      "best_val_loss": 0.4784,
+      "stage1_acc": 0.84,
+      "stage2_acc": 0.84,
+      "n_pseudo_s1": 0,
+      "n_pseudo_s2": 4510
+    },
+    {
+      "fold": 4,
+      "best_val_acc": 0.86,
+      "best_val_loss": 0.4358,
+      "stage1_acc": 0.86,
+      "stage2_acc": 0.86,
+      "n_pseudo_s1": 0,
+      "n_pseudo_s2": 4818
+    }
+  ],
+  "mean_val_acc": 0.8565,
+  "std_val_acc": 0.0094,
+  "mean_pseudo_s1": 0.0,
+  "mean_pseudo_s2": 4377.2
+}

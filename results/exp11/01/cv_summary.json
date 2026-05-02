@@ -1,0 +1,67 @@
+{
+  "experiment": "exp11",
+  "run_id": "01",
+  "timestamp": "2026-04-27T02:29:40",
+  "config": {
+    "experiment": {
+      "name": "exp11"
+    },
+    "model": {
+      "name": "roberta-large"
+    },
+    "pseudo_gen": {
+      "epochs": 3,
+      "batch_size": 8,
+      "gradient_accumulation": 2,
+      "max_length": 192,
+      "warmup_ratio": 0.1,
+      "weight_decay": 0.05
+    },
+    "training": {
+      "learning_rate": 1e-05,
+      "batch_size": 8,
+      "gradient_accumulation": 2,
+      "epochs": 3,
+      "max_length": 192,
+      "seed": 42,
+      "n_folds": 5,
+      "warmup_ratio": 0.1,
+      "weight_decay": 0.05
+    }
+  },
+  "fold_results": [
+    {
+      "fold": 0,
+      "val_acc": 0.8725,
+      "val_loss": 0.6221,
+      "val_f1": 0.8765
+    },
+    {
+      "fold": 1,
+      "val_acc": 0.9025,
+      "val_loss": 0.4379,
+      "val_f1": 0.9051
+    },
+    {
+      "fold": 2,
+      "val_acc": 0.865,
+      "val_loss": 0.658,
+      "val_f1": 0.867
+    },
+    {
+      "fold": 3,
+      "val_acc": 0.8675,
+      "val_loss": 0.4105,
+      "val_f1": 0.863
+    },
+    {
+      "fold": 4,
+      "val_acc": 0.895,
+      "val_loss": 0.4358,
+      "val_f1": 0.8934
+    }
+  ],
+  "mean_val_acc": 0.8805,
+  "std_val_acc": 0.0153,
+  "n_pseudo": 11000
+}

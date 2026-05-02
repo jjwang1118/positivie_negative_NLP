@@ -13,8 +13,26 @@ venv/
 *.bin
 *.safetensors
 
-# Experiment run outputs
-results/exp*/
+# Large binary files
+*.pdf
+
+# Local Claude settings (machine-specific)
+.claude/settings.local.json
+
+# Old experiment results (exp01–exp08, exp10 not needed)
+results/exp01/
+results/exp02/
+results/exp03/
+results/exp04/
+results/exp05/
+results/exp06/
+results/exp07/
+results/exp08/
+results/exp10/
+
+# Checkpoint subdirectories in exp11 (contain model weights)
+results/exp11/*/fold*/ckpts/
+results/exp11/*/fold*/best_model/
 
 # Jupyter
 .ipynb_checkpoints/

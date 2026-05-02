@@ -20,7 +20,7 @@ stage1:
   n_folds: 5
   label_smoothing: 0.1
   warmup_ratio: 0.1
-  confidence_threshold: 0.90   # was 0.95 → n_pseudo_s1=0 all folds; lowered to activate self-training
+  confidence_threshold: 0.80   # was 0.95 → n_pseudo_s1=0 all folds; lowered to activate self-training
 
 # Stage 2: Partial encoder unfreeze + Stage 1 pseudo-labels
 # Goal: adapt encoder representations to this dataset
@@ -34,7 +34,7 @@ stage2:
   label_smoothing: 0.1
   warmup_ratio: 0.1
   unfreeze_last_n: 3            # unfreeze last 3 of 24 RoBERTa-large layers
-  confidence_threshold: 0.9   # was 0.90; slightly stricter to keep S3 pseudo-label quality
+  confidence_threshold: 0.85   # was 0.90; slightly stricter to keep S3 pseudo-label quality
 
 # Stage 3 (optional): Final refinement with Stage 2 pseudo-labels
 # [run02] encoder_lr: 2e-6 | head_lr: 5e-5 | epochs: 15 → mean_pseudo_s2=4377, mean_val_acc=0.8565

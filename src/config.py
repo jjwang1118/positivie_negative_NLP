@@ -32,10 +32,11 @@ MODEL_REGISTRY = {
     "sentiment-roberta-large": "siebert/sentiment-roberta-large-english",
 
     # General BERT-family baselines (available for future experiments)
-    "bert-base":     "bert-base-uncased",
-    "bert-large":    "bert-large-uncased",
-    "roberta-base":  "roberta-base",
-    "distilbert":    "distilbert-base-uncased",
+    "bert-base":      "bert-base-uncased",
+    "bert-large":     "bert-large-uncased",
+    "roberta-base":   "roberta-base",
+    "roberta-large":  "roberta-large",
+    "distilbert":     "distilbert-base-uncased",
 }
 
 # ---------------------------------------------------------------------------
