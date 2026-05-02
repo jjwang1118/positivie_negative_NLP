@@ -66,10 +66,12 @@
 \begin{@twocolumnfalse}
   \begin{center}
     {\Large\bfseries NLP Sentiment Analysis Report}\\[6pt]
-    \begin{tabular}{cccc}
+    \begin{tabular}{c}
       Author A \\
       \small 114423002  \\
-      \small \texttt{jjwang1118@gmail.com} 
+      \small \texttt{jjwang1118@gmail.com} \\[2pt]
+      \small \href{https://github.com/jjwang1118/positivie_negative_NLP/tree/main}%
+        {\texttt{github.com/jjwang1118/positivie\_negative\_NLP}}
     \end{tabular}
   \end{center}
   \vspace{4pt}
@@ -82,13 +84,13 @@ labeled data makes models prone to overfitting with limited
 generalization ability. How to effectively leverage the large unlabeled
 test set through pseudo-labeling strategies thus becomes the core
 research problem. Using RoBERTa-large as the backbone, this study
-designs and compares two pseudo-labeling strategies: \textbf{EXP01}
+designs and compares two pseudo-labeling strategies: \textbf{EXP01(EXP09-05)}
 adopts a three-stage progressive encoder unfreezing pipeline ---
 Stage~1 freezes the entire encoder and trains only the classification
 head to establish a stable initial model, while Stages~2--3
 progressively unfreeze the last three encoder layers and use a
 confidence threshold (0.90) to filter pseudo-labels for training set
-augmentation; \textbf{EXP02} adopts a two-stage strategy --- Phase~0
+augmentation; \textbf{EXP02(EXP11-01)} adopts a two-stage strategy --- Phase~0
 trains a warm-up model on all labeled data and generates pseudo-labels
 for the full 11,000 test samples (no confidence threshold), and Phase~1
 trains a 5-fold model using each fold's labeled data plus all
@@ -655,7 +657,11 @@ Seed / n\_folds    & 42 / ---          & 42 / 5 \\
 \bottomrule
 \end{tabular}}
 
-\onecolumn
+%% fill both columns then force a new physical page (twocolumn mode)
+\vspace*{\fill}
+\newpage
+\null\vspace*{\fill}
+\newpage
 \section{\texttt{clean\_text} Contraction Correction Rules (EXP02)}
 
 \begin{center}
