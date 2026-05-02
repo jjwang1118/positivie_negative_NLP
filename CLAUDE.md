@@ -90,3 +90,5 @@ structure-manager → data-analyzer → paper-collector
       4.  src/ 
       5. tests/
       6. 最外層所有檔案，並將claude.md寫入readme.md 
+      7. reprort_framework之後要同時推送和更新中文版和英文版
+
