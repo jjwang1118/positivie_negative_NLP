@@ -15,7 +15,7 @@ This study uses the Kaggle dataset "Positive/Negative: Text Polarity Classificat
 ![alt text](exp09-05.png)
 
 - EXP02 (exp11-01) pipeline
-![alt text](exp11-01.png)
+![alt text](image.png)
 
 Sentiment analysis is one of the core tasks in natural language processing (NLP), widely applied in public opinion monitoring, product review analysis, and social media understanding. Its goal is to automatically identify the sentiment orientation expressed in text — in the case of binary classification, to determine whether a piece of text conveys a positive or negative sentiment. Although pre-trained language models (PLMs) represented by BERT have greatly improved performance on such tasks in recent years, in practical scenarios the acquisition of manually labeled data is often costly. How to fully exploit the potential of models under limited labeled samples remains an important research challenge.
 
